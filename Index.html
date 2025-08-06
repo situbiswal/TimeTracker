@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apextree"></script>
+  <script src="https://unpkg.com/@iconify/iconify@2.1.0/dist/iconify.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .card-custom:hover .card-icon,
+    .card-custom:hover h6,
+    .card-custom:hover .stat-number {
+      transform: scale(1.15);
+      transition: transform 0.3s ease;
+    }
+
+    .card-icon,
+    .stat-number,
+    .card-custom h6 {
+      display: inline-block;
+      transition: transform 0.3s ease;
+      will-change: transform;
+    }
+    .draggable {
+        cursor: move;
+    }
+    .card-custom {
+      border-radius: 1rem;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+      height: 100%;
+      transition: box-shadow 0.3s ease;
+      
+    }
+    .card-custom:hover {
+      box-shadow: 0px 0px 0px 6px #4b5481ed;
+    }
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .card-icon {
+      font-size: 2rem;
+      color: #0d6efd;
+    }
+    .chart-container {
+      min-height: 300px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .dropdown-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .custom-scroll-select {
+    max-height: 150px;
+    overflow-y: auto;
+    }
+    .chart-container {
+      max-height: 330px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    #projectChart {
+    overflow-y: auto;
+    }
+      .custom-avatar {
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+  </style>
+</head>
+<body>
+<div class="container-fluid p-4">
+  <div class="row g-4">
+    <!-- Stats Cards -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card card-custom text-center p-3">
+        <span class="iconify card-icon" data-icon="mdi:calendar-check"></span>
+        <h6>Available Leaves</h6>
+        <div class="stat-number">22.5</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card card-custom text-center p-3">
+        <span class="iconify card-icon" data-icon="mdi:clock-alert-outline"></span>
+        <h6>Pending Leaves</h6>
+        <div class="stat-number">0</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card card-custom text-center p-3">
+        <span class="iconify card-icon" data-icon="mdi:history"></span>
+        <h6>Past Leaves</h6>
+        <div class="stat-number">6</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card card-custom text-center p-3">
+        <span class="iconify card-icon" data-icon="mdi:calendar-month-outline"></span>
+        <h6>Future Leaves</h6>
+        <div class="stat-number">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+   <div class="row g-4 mt-2" id="widgetGrid">
+      <div class="col-lg-6 draggable" data-id="1">
+        <div class="card card-custom p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0"> Timesheet for June<span id="currentMonth"></span></h6>
+            <button class="btn btn-sm btn-outline-dark">Enter Timesheet</button>
+          </div>
+          <div id="timesheetChart" class="chart-container"></div>
+        </div>
+      </div>
+      <div class="col-lg-6 draggable" data-id="2">
+        <div class="card card-custom p-3 h-100">
+          <div class="dropdown-container">
+            <h6 id="projectTitle">Top 5 Projects </h6>
+            <select id="projectLimit" class="form-select form-select-sm mb-2 custom-scroll-select" style="max-width: 200px;">
+              <option value="5">Top 5</option>
+              <option value="10">Top 10</option>
+              <option value="20">Top 20</option>
+              <option value="30">Top 30</option>
+              <option value="50">Top 50</option>
+            </select>
+          </div>
+          <div id="projectChart" class="chart-container"></div>
+        </div>
+      </div>
+      <div class="col-lg-6 draggable" data-id="3">
+        <div class="card card-custom p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0"> Organisation Chart<span id="currentMonth"></span></h6>
+          </div>
+          <div id="svg-tree" class="chart-container"></div>
+        </div>
+      </div>
+      <div class="col-lg-6 draggable" data-id="4">
+        <div class="card card-custom p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Team's Unavailability</h6>
+            <select id="weekSelector" class="form-select form-select-sm" style="max-width: 200px;">
+              <option value="current">Current Week</option>
+              <option value="next">Next Week</option>
+              <option value="both">Current + Next Week</option>
+            </select>
+          </div>
+          <div id="unavailableChart"></div>
+        </div>
+      </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script>
+    const grid = document.getElementById("widgetGrid");
+
+    const sortable = Sortable.create(grid, {
+      animation: 150,
+      handle: ".draggable",
+      draggable: ".draggable",
+      onEnd: function () {
+        const order = [...grid.children].map(item => item.dataset.id);
+        localStorage.setItem("dashboardOrder", JSON.stringify(order));
+      }
+    });
+
+    // Restore order
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedOrder = JSON.parse(localStorage.getItem("dashboardOrder"));
+      if (savedOrder) {
+        const current = [...grid.children];
+        savedOrder.forEach(id => {
+          const el = current.find(child => child.dataset.id === id);
+          if (el) grid.appendChild(el);
+        });
+      }
+    });
+  </script>
+<script>
+  const categories = ['May 31 - Jun 06', 'Jun 07 - Jun 13', 'Jun 14 - Jun 20', 'Jun 21 - Jun 27'];
+  const projectData = [24, 30, 35, 28];
+  const meetingData = [6, 5, 40, 4];
+  const supportData = [15, 10, 5, 8];
+  const totalData = projectData.map((val, idx) => val + meetingData[idx] + supportData[idx]);
+
+  var timesheetChart = new ApexCharts(document.querySelector("#timesheetChart"), {
+    chart: {
+      height: 300,
+      type: 'bar',
+      stacked: true,
+      toolbar: { show: true }
+    },
+    series: [
+      { name: 'Project Work', data: projectData },
+      { name: 'Meetings', data: meetingData },
+      { name: 'Support', data: supportData },
+      { name: 'Total', type: 'line', data: totalData }
+    ],
+    xaxis: {
+      categories: categories,
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: { show: true },
+      lines: { show: false }
+    },
+    yaxis: {
+      title: { text: 'Hours' },
+      min: 0,
+      max: 100
+    },
+     grid: {
+    show: false, 
+  },
+    dataLabels: {
+      enabled: true,
+      enabledOnSeries: [3],
+      formatter: function (val) {
+        return val + ' hrs';
+      },
+      offsetY: -10,
+      style: {
+        fontSize: '12px',
+        colors: ['#000']
+      }
+    },
+    stroke: {
+      width: [0, 0, 0, 3],
+      curve: 'smooth'
+    },
+    colors: ['#0d6efd', '#198754', '#ffc107', '#FF4560'],
+    plotOptions: {
+      bar: {
+        columnWidth: '45%',
+        borderRadius: 5,
+        dataLabels: { position: 'top' },
+        distributed: false
+      }
+    },
+    tooltip: {
+      shared: true,
+      intersect: false
+    },
+    states: {
+      hover: {
+        filter: {
+          type: 'lighten',
+          value: 0.1
+        }
+      }
+    }
+  });
+  timesheetChart.render();
+
+ const allProjects = [
+  { name: 'Customer Support', hours: 25.5 },
+  { name: 'RD0049 - ScopeHub', hours: 30 },
+  { name: 'RD0058 - Cleaning OHSU', hours: 38 },
+  { name: 'MP0564 - Renewal', hours: 22 },
+  { name: 'RD0923 - New Features', hours: 20.5 },
+  { name: 'RD1120 - Dashboard UX', hours: 10 },
+  { name: 'RD1020 - Bug Fixes', hours: 20 },
+  { name: 'RD0922 - Planning', hours: 8 },
+  { name: 'RD0800 - Meeting Reports', hours: 5 },
+  { name: 'RD0777 - UI Updates', hours: 15 },
+  { name: 'RD0999 - Infra Support', hours: 3 },
+  { name: 'RD0666 - Client Review', hours: 7 },
+  { name: 'Project Alpha', hours: 85 },
+  { name: 'Beta Release', hours: 42 },
+  { name: 'Gamma Integration', hours: 65 },
+  { name: 'Design Sprint', hours: 30 },
+  { name: 'Client Onboarding', hours: 22 },
+  { name: 'Backend API', hours: 55 },
+  { name: 'Frontend Revamp', hours: 78 },
+  { name: 'Security Audit', hours: 12 },
+  { name: 'Performance Optimization', hours: 25 },
+  { name: 'Data Migration', hours: 18 },
+  { name: 'User Testing', hours: 33 },
+  { name: 'Documentation', hours: 14 },
+  { name: 'Content Update', hours: 10 },
+  { name: 'Feature Development', hours: 90 },
+  { name: 'Bug Triage', hours: 8 },
+  { name: 'Analytics Setup', hours: 20 },
+  { name: 'Marketing Campaign', hours: 40 },
+  { name: 'Sales Dashboard', hours: 60 },
+  { name: 'CRM Integration', hours: 50 },
+  { name: 'Server Migration', hours: 38 },
+  { name: 'Client Feedback', hours: 17 },
+  { name: 'Mobile App', hours: 100 },
+  { name: 'Chatbot Feature', hours: 24 },
+  { name: 'Training Program', hours: 15 },
+  { name: 'Legal Review', hours: 7 },
+  { name: 'Performance Metrics', hours: 30 },
+  { name: 'Refactoring Code', hours: 25 },
+  { name: 'UI Testing', hours: 12 },
+  { name: 'Accessibility Improvements', hours: 9 },
+  { name: 'Localization', hours: 11 },
+  { name: 'DevOps Setup', hours: 20 },
+  { name: 'API Documentation', hours: 13 },
+  { name: 'Email Campaign', hours: 22 },
+  { name: 'UX Improvements', hours: 28 },
+  { name: 'Backup System', hours: 6 },
+  { name: 'Cost Analysis', hours: 9 },
+];
+
+function renderProjectChart(limit) {
+  const filtered = allProjects.slice(0, limit);
+  const hours = filtered.map(p => p.hours);
+  const labelText = filtered.map(p => `${p.name} - ${p.hours} hrs`);
+  const maxVal = Math.max(...hours);
+  const suggestedMax = Math.ceil((maxVal + 10) / 10) * 10;
+
+  const perBarHeight = 60;
+  const chartHeight = filtered.length * perBarHeight;
+
+  const container = document.querySelector("#projectChart");
+  container.innerHTML = "";
+  container.style.height = "330px";
+  container.style.overflowY = "auto";
+
+  const chartDiv = document.createElement("div");
+  chartDiv.style.height = chartHeight + "px";
+  container.appendChild(chartDiv);
+
+  // This creates y-axis labels as ['1', '2', '3', ...]
+  const yAxisNumbers = filtered.map((_, index) => (index + 1).toString());
+
+  const projectChart = new ApexCharts(chartDiv, {
+    chart: {
+      type: 'bar',
+      height: chartHeight
+    },
+    series: [{
+      name: 'Hours',
+      data: hours
+    }],
+    xaxis: {
+      min: 0,
+      max: suggestedMax,
+      labels: { show: true, style: { fontSize: '12px' } },
+      axisTicks: { show: false },
+      axisBorder: { show: false },
+      title: { text: 'Hours Spent' }
+    },
+    yaxis: {
+      show: false,
+      categories: yAxisNumbers, // ✅ critical fix
+      labels: {
+        show: true,
+        style: {
+          fontSize: '12px',
+          fontWeight: 500
+        }
+      }
+    },
+    grid: {
+      show: false
+    },
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        borderRadius: 4,
+        distributed: true,
+        barHeight: '60%',
+        dataLabels: {
+          position: 'top'
+        }
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      textAnchor: 'start',
+      offsetX: 5,
+      style: {
+        fontSize: '13px',
+        colors: ['#000'],
+        fontWeight: 500
+      },
+      formatter: function (_, { dataPointIndex }) {
+        return labelText[dataPointIndex];
+      }
+    },
+    tooltip: {
+      y: {
+        formatter: function (val, { dataPointIndex }) {
+          return labelText[dataPointIndex];
+        }
+      }
+    },
+    legend: { show: false },
+    colors: [
+      '#0d6efd', '#198754', '#ffc107', '#FF4560', '#6f42c1',
+      '#20c997', '#fd7e14', '#0dcaf0', '#6610f2', '#dc3545',
+      '#6c757d', '#28a745', '#e83e8c', '#17a2b8', '#007bff',
+      '#f8f9fa', '#343a40', '#adb5bd', '#b02a37', '#4caf50',
+      '#795548', '#9c27b0', '#3f51b5', '#607d8b', '#009688',
+      '#8bc34a', '#cddc39', '#ffeb3b', '#ff9800', '#ff5722',
+      '#e91e63', '#9e9e9e', '#f44336', '#03a9f4', '#00bcd4',
+      '#2196f3', '#673ab7', '#00acc1', '#26c6da', '#26a69a',
+      '#66bb6a', '#c62828', '#2e7d32', '#283593', '#4527a0',
+      '#1565c0', '#0277bd', '#00838f', '#006064', '#004d40'
+    ]
+  });
+
+  projectChart.render();
+}
+
+
+
+
+
+
+
+  document.getElementById("projectLimit").addEventListener("change", function () {
+    
+    renderProjectChart(parseInt(this.value));
+    const title = document.getElementById("projectTitle");
+    title.textContent = `Top ${this.value} Projects`;
+
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+  renderProjectChart(5); // default top 5
+ 
+});
+</script>
+<script>
+  const data = {
+        id: 'sr',
+        data: {
+          imageURL: './images/SR.png',
+          name: 'Samuel Rajan',
+        },
+        options: {
+          nodeBGColor: '#cdb4db',
+          nodeBGColorHover: '#cdb4db',
+        },
+        children: [
+          
+          {
+            id: 'kt',
+            data: {
+              imageURL: './images/KT.png',
+              name: 'Poojashree KT',
+            },
+            options: {
+              nodeBGColor: '#00afb9',
+              nodeBGColorHover: '#00afb9',
+            },
+            children: [
+              {
+                id: 'Sm',
+                data: {
+                  imageURL: './images/SM.png',
+                  name: 'Sohel Maniyar',
+                },
+                options: {
+                  nodeBGColor: '#84a59d',
+                  nodeBGColorHover: '#84a59d',
+                },
+              }
+            ],
+          },{
+            id:'rs',
+            data: {
+              imageURL: './images/RS.png',
+              name: 'Rakesh Kumar Samal',
+            },
+            options: {
+              nodeBGColor: '#f07167',
+              nodeBGColorHover: '#f07167',
+            },children: [
+              {
+                id: 'sa',
+                data: {
+                  imageURL: './images/SA.png',
+                  name: 'Shahabuddin Anwar',
+                },
+                options: {
+                  nodeBGColor: '#84b59d',
+                  nodeBGColorHover: '#84b59d',
+                },
+              }
+            ],
+          },
+          {
+            id:'ui',
+            data: {
+              imageURL: './images/UI.png',
+              name: 'Ummar Ibrahim',
+            },
+            options: {
+              nodeBGColor: '#f07128',
+              nodeBGColorHover: '#f07128',
+            },
+          },
+          {
+            id:'sb',
+            data: {
+              imageURL: './images/SB.png',
+              name: 'Situ Biswal',
+            },
+            options: {
+              nodeBGColor: '#f09532',
+              nodeBGColorHover: '#f09532',
+            },
+          },{
+            id:'am',
+            data: {
+              imageURL: './images/AM.png',
+              name: 'Akshya Manjunath',
+            },
+            options: {
+              nodeBGColor: '#f01258',
+              nodeBGColorHover: '#f01258',
+            },
+          },{
+            id: 'jn',
+            data: {
+              imageURL: './images/JN.png',
+              name: 'Jeevan Nanaiah',
+            },
+            options: {
+              nodeBGColor: '#ffafcc',
+              nodeBGColorHover: '#ffafcc',
+            },
+            children: [
+              {
+                id: 'vb',
+                data: {
+                  imageURL: './images/VB.png',
+                  name: 'Viresh Badiger',
+                },
+                options: {
+                  nodeBGColor: '#f8ad9d',
+                  nodeBGColorHover: '#f8ad9d',
+                },
+              },
+              {
+                id: 'hs',
+                data: {
+                  imageURL: './images/HS.png',
+                  name: 'Hari Srinivas',
+                },
+                options: {
+                  nodeBGColor: '#c9cba3',
+                  nodeBGColorHover: '#c9cba3',
+                },
+              },{
+                id: 'cp',
+                data: {
+                  imageURL: './images/CP.png',
+                  name: 'Chandini Pratap',
+                },
+                options: {
+                  nodeBGColor: '#f9c74f',
+                  nodeBGColorHover: '#f9c74f',
+                },
+              }
+            ],
+          }
+        ],
+      };
+      const options = {
+        contentKey: 'data',
+        width: 800,
+        nodeWidth: 150,
+        nodeHeight: 100,
+        fontColor: '#fff',
+        borderColor: '#333',
+        childrenSpacing: 50,
+        siblingSpacing: 20,
+        direction: 'top',
+        nodeTemplate: (content) =>
+          `<div style='display: flex;flex-direction: column;gap: 10px;justify-content: center;align-items: center;height: 100%;'>
+          <img style='width: 35px;height: 35px;border-radius: 50%;' src='${content.imageURL}' alt='' />
+          <div style="font-weight: bold; font-family: Arial; font-size: 14px">${content.name}</div>
+         </div>`,
+        canvasStyle: 'border: 1px solid black;background: #f6f6f6;',
+        enableToolbar: true,
+      };
+      const tree = new ApexTree(document.getElementById('svg-tree'), options);
+      tree.render(data);
+</script>
+
+<script>
+ 
+
+const employees = [
+    {
+      id: 1,
+      name: "Situ Biswal",
+      avatar: "./Images/SB.png",
+      dates: ["2025-08-09", "2025-08-07", "2025-08-04"]
+    },
+    {
+      id: 2,
+      name: "Ummar Ibrahim",
+      avatar: "./Images/UI.png",
+      dates: ["2025-08-06", "2025-08-12", "2025-08-14"]
+    }
+    ,
+    {
+      id: 3,
+      name: "Rakesh Kumar Samal",
+      avatar: "./Images/RS.png",
+      dates: ["2025-08-13", "2025-08-05"]
+    },
+    {
+      id: 4,
+      name: "Akshya Manjunath",
+      avatar: "./Images/AM.png",
+      dates: ["2025-08-06"]
+    },
+    {
+      id: 5,
+      name: "Poojashree KT",
+      avatar: "./Images/KT.png",
+      dates: ["2025-08-07"]
+    },
+    {
+      id: 6,
+      name: "Sohel Maniyar",
+      avatar: "./Images/SM.png",
+      dates: ["2025-08-09"]
+    },
+    {
+      id: 6,
+      name: "Samuel Rajan",
+      avatar: "./Images/SR.png",
+      dates: ["2025-08-02", "2025-08-09", "2025-08-05"]
+    }
+
+  ];
+
+  function getWeekDates(type) {
+    const today = new Date();
+    const day = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((day + 6) % 7));
+
+    const days = (offset) => Array.from({ length: 5 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + offset + i);
+      return d;
+    });
+
+    if (type === "current") return days(0);
+    if (type === "next") return days(7);
+    if (type === "both") return days(0).concat(days(7));
+    return [];
+  }
+
+  function renderChart(type = "current") {
+    const weekDates = getWeekDates(type);
+    const min = weekDates[0].getTime();
+    const max = new Date(weekDates[weekDates.length - 1]).getTime() + 86400000;
+
+    const series = employees.map((emp, index) => ({
+      name: emp.name,
+      data: emp.dates.map(date => [new Date(date).getTime(), emp.id])
+    }));
+
+    const options = {
+      series: series,
+      chart: {
+        height: 300,
+        type: 'scatter',
+       
+        zoom: { enabled: false },
+        toolbar: { show: false }
+      },
+     
+      xaxis: {
+        type: 'datetime',
+        min: min,
+        max: max,
+        labels: {
+          format: 'dd MMM',
+          style: { fontSize: '12px' }
+        },
+        title: { text: "Unavailability Date" }
+      },
+      yaxis: {
+        tickAmount: employees.length,
+        labels: {
+          show:false,
+          formatter: function (val) {
+            const emp = employees.find(e => e.id === val);
+            return emp ? `​${emp.name}` : '';
+          },
+          style: { fontSize: '12px' },
+          useHTML: true
+        },
+        title: { text: "Employees" }
+      },
+      fill: {
+        type: 'image',
+        image: {
+          src: employees.map(e => e.avatar),
+          width: 30,
+          height: 30,
+          className: 'custom-avatar'
+        }
+      },
+      markers: { size: 30 },
+      legend:{show: false},
+      
+      tooltip: {
+        custom: function ({ series, seriesIndex, dataPointIndex }) {
+          const emp = employees[seriesIndex];
+          const date = new Date(series[seriesIndex][dataPointIndex][0]);
+          return `<div style='padding:5px;'>
+            <img src="${emp.avatar}" class="custom-avatar" />
+            <div><strong>${emp.name}</strong><br>${emp.dates}</div>
+          </div>`;
+        }
+      }
+    };
+
+    document.querySelector("#unavailableChart").innerHTML = "";
+    new ApexCharts(document.querySelector("#unavailableChart"), options).render();
+  }
+
+  document.getElementById("weekSelector").addEventListener("change", function () {
+    renderChart(this.value);
+  });
+
+  renderChart("current");
+
+
+
+
+</script>
+</body>
+</html>
